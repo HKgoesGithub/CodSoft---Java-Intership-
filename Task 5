@@ -1,0 +1,295 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Course 
+{
+    private String code;
+    private String title;
+    private String description;
+    private int capacity;
+    private List<String> schedule;
+    private List<String> students;
+
+    public Course(String code, String title, String description, int capacity, List<String> schedule) 
+    {
+        this.code = code;
+        this.title = title;
+        this.description = description;
+        this.capacity = capacity;
+        this.schedule = schedule;
+        this.students = new ArrayList<>();
+    }
+
+    public String getCode() 
+    {
+        return code;
+    }
+
+    public String getTitle() 
+    {
+        return title;
+    }
+
+    public String getDescription() 
+    {
+        return description;
+    }
+
+    public int getCapacity() 
+    {
+        return capacity;
+    }
+
+    public List<String> getSchedule() 
+    {
+        return schedule;
+    }
+
+    public List<String> getStudents() 
+    {
+        return students;
+    }
+
+    public void addStudent(String student) 
+    {
+        if (!isFull()) 
+        {
+            students.add(student);
+        } else 
+        {
+            System.out.println("Course is full. Cannot add student: " + student);
+        }
+    }
+
+    public void removeStudent(String student) 
+    {
+        students.remove(student);
+    }
+
+    public boolean isFull() 
+    {
+        return students.size() >= capacity;
+    }
+
+    @Override
+    public String toString() 
+    {
+        return "Course Code: " + code + ", Title: " + title + ", Description: " + description +
+                ", Capacity: " + capacity + ", Schedule: " + schedule + ", Enrolled Students: " + students.size();
+    }
+}
+
+class Student 
+{
+    private String id;
+    private String name;
+    private List<Course> courses;
+
+    public Student(String id, String name) {
+        this.id = id;
+        this.name = name;
+        this.courses = new ArrayList<>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void addCourse(Course course) {
+        courses.add(course);
+    }
+
+    public void removeCourse(Course course) {
+        courses.remove(course);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Student ID: " + id + ", Name: " + name + ", Courses: ");
+        for (Course course : courses) {
+            sb.append(course.getCode()).append(" ");
+        }
+        return sb.toString();
+    }
+}
+
+class CourseDatabase {
+    private List<Course> courses;
+
+    public CourseDatabase() {
+        this.courses = new ArrayList<>();
+    }
+
+    public void addCourse(Course course) {
+        courses.add(course);
+    }
+
+    public void removeCourse(Course course) {
+        courses.remove(course);
+    }
+
+    public List<Course> getAvailableCourses() {
+        List<Course> availableCourses = new ArrayList<>();
+        for (Course course : courses) {
+            if (!course.isFull()) {
+                availableCourses.add(course);
+            }
+        }
+        return availableCourses;
+    }
+
+    public Course findCourseByCode(String code) {
+        for (Course course : courses) {
+            if (course.getCode().equals(code)) {
+                return course;
+            }
+        }
+        return null;
+    }
+}
+
+class StudentDatabase {
+    private List<Student> students;
+
+    public StudentDatabase() {
+        this.students = new ArrayList<>();
+    }
+
+    public void addStudent(Student student) {
+        students.add(student);
+    }
+
+    public void removeStudent(Student student) {
+        students.remove(student);
+    }
+
+    public List<Student> getStudents() {
+        return students;
+    }
+
+    public Student findStudentById(String id) {
+        for (Student student : students) {
+            if (student.getId().equals(id)) {
+                return student;
+            }
+        }
+        return null;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        CourseDatabase courseDatabase = new CourseDatabase();
+        StudentDatabase studentDatabase = new StudentDatabase();
+
+        // Add sample courses
+        List<String> schedule1 = List.of("MWF 9:00-10:00");
+        Course course1 = new Course("CSC101", "Introduction to Computer Science", "Learn the basics of computer programming.", 30, schedule1);
+        courseDatabase.addCourse(course1);
+
+        List<String> schedule2 = List.of("TR 11:00-12:00");
+        Course course2 = new Course("MTH101", "Calculus I", "Learn single-variable calculus.", 50, schedule2);
+        courseDatabase.addCourse(course2);
+
+        // Add sample students
+        Student student1 = new Student("123456", "John Doe");
+        studentDatabase.addStudent(student1);
+
+        Student student2 = new Student("654321", "Jane Smith");
+        studentDatabase.addStudent(student2);
+
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("\nMenu:");
+            System.out.println("1. List Available Courses");
+            System.out.println("2. Register Student for a Course");
+            System.out.println("3. Drop Course for a Student");
+            System.out.println("4. List Students and Their Courses");
+            System.out.println("5. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.println("\nAvailable Courses:");
+                    for (Course course : courseDatabase.getAvailableCourses()) {
+                        System.out.println(course);
+                    }
+                    break;
+
+                case 2:
+                    System.out.print("Enter Student ID: ");
+                    String studentId = scanner.nextLine();
+                    Student student = studentDatabase.findStudentById(studentId);
+                    if (student == null) {
+                        System.out.println("Student not found.");
+                        break;
+                    }
+
+                    System.out.print("Enter Course Code: ");
+                    String courseCode = scanner.nextLine();
+                    Course course = courseDatabase.findCourseByCode(courseCode);
+                    if (course == null) {
+                        System.out.println("Course not found.");
+                        break;
+                    }
+
+                    if (!course.isFull()) {
+                        course.addStudent(studentId);
+                        student.addCourse(course);
+                        System.out.println("Student registered for the course successfully.");
+                    } else {
+                        System.out.println("Course is full.");
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Enter Student ID: ");
+                    studentId = scanner.nextLine();
+                    student = studentDatabase.findStudentById(studentId);
+                    if (student == null) {
+                        System.out.println("Student not found.");
+                        break;
+                    }
+
+                    System.out.print("Enter Course Code: ");
+                    courseCode = scanner.nextLine();
+                    course = courseDatabase.findCourseByCode(courseCode);
+                    if (course == null) {
+                        System.out.println("Course not found.");
+                        break;
+                    }
+
+                    course.removeStudent(studentId);
+                    student.removeCourse(course);
+                    System.out.println("Course dropped successfully.");
+                    break;
+
+                case 4:
+                    System.out.println("\nStudents and Their Courses:");
+                    for (Student s : studentDatabase.getStudents()) {
+                        System.out.println(s);
+                    }
+                    break;
+
+                case 5:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
